@@ -1,0 +1,2 @@
+# inside-redirect
+redirect page
