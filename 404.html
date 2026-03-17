@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // Grab the URL path and force it to lowercase
+    const currentPath = window.location.pathname.toLowerCase();
+    
+    // If it matches your intended page, redirect to the exact lowercase folder
+    if (currentPath === '/floaties!') {
+      window.location.replace('/floaties!');
+    }
+  </script>
+</head>
+<body>
+  <p>Page not found, or redirecting...</p>
+</body>
+</html>
