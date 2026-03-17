@@ -1,19 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Loss of Signal</title>
+  
   <script>
-    // Grab the URL path and force it to lowercase
+    // 1. The Redirect Logic
     const currentPath = window.location.pathname.toLowerCase();
     
-    // If it matches your intended page, redirect to the exact lowercase folder
-    if (currentPath === '/floaties!') {
+    // Catch variations of floaties! and redirect
+    if (currentPath === '/floaties!' || currentPath === '/floaties%21') {
       window.location.replace('/floaties!');
     }
   </script>
+
+  <style>
+    /* 2. The AV "No Signal" CSS */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #000;
+      font-family: "Courier New", Courier, monospace;
+      overflow: hidden;
+    }
+
+    /* Standard 75% SMPTE Color Bars built with a single gradient */
+    .smpte-bars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, 
+        #bfbfbf 0%, #bfbfbf 14.28%, 
+        #c0c000 14.28%, #c0c000 28.56%, 
+        #00c0c0 28.56%, #00c0c0 42.84%, 
+        #00c000 42.84%, #00c000 57.12%, 
+        #c000c0 57.12%, #c000c0 71.4%, 
+        #c00000 71.4%, #c00000 85.68%, 
+        #0000c0 85.68%, #0000c0 100%
+      );
+      z-index: 1;
+    }
+
+    /* Interlaced CRT Monitor Scanlines */
+    .scanlines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 2px,
+        rgba(0, 0, 0, 0.2) 2px,
+        rgba(0, 0, 0, 0.2) 4px
+      );
+      z-index: 2;
+      pointer-events: none; /* Lets you click links underneath */
+    }
+
+    /* Centered Error Box */
+    .error-container {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .osd-box {
+      background-color: rgba(0, 0, 0, 0.85);
+      border: 2px solid #fff;
+      padding: 40px 60px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Glitch/RGB Split Effect */
+    h1.glitch {
+      color: white;
+      font-size: 4rem;
+      margin: 0 0 10px 0;
+      font-weight: bold;
+      letter-spacing: 5px;
+      position: relative;
+      text-shadow: 
+        0.05em 0 0 rgba(255, 0, 0, 0.75),
+        -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+        0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+      animation: jitter 2s infinite;
+    }
+
+    p {
+      color: #00ff00; /* Classic terminal green */
+      font-size: 1.2rem;
+      margin: 0 0 30px 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid #fff;
+      padding: 10px 20px;
+      text-transform: uppercase;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    a:hover {
+      background-color: #fff;
+      color: #000;
+    }
+
+    /* Keyframes for the tracking jitter */
+    @keyframes jitter {
+      0% { text-shadow: 3px 0 0 rgba(255,0,0,0.7), -3px 0 0 rgba(0,0,255,0.7); }
+      2% { text-shadow: -3px 0 0 rgba(255,0,0,0.7), 3px 0 0 rgba(0,0,255,0.7); }
+      4% { text-shadow: 3px 0 0 rgba(255,0,0,0.7), -3px 0 0 rgba(0,0,255,0.7); }
+      6% { text-shadow: 0 0 0 transparent, 0 0 0 transparent; }
+      100% { text-shadow: 0 0 0 transparent, 0 0 0 transparent; }
+    }
+  </style>
 </head>
 <body>
-  <p>Page not found, or redirecting...</p>
+
+  <div class="smpte-bars"></div>
+  <div class="scanlines"></div>
+
+  <div class="error-container">
+    <div class="osd-box">
+      <h1 class="glitch">NO SIGNAL</h1>
+      <p>ERR 404: ROUTING FAULT</p>
+      <a href="/">Return to Main Mix</a>
+    </div>
+  </div>
+
 </body>
 </html>
