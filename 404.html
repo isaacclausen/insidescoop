@@ -16,117 +16,157 @@
   <style>
     body, html {
       margin: 0; padding: 0; height: 100%;
-      background: black; /* Default black before image loads */
-      display: flex; justify-content: center; align-items: center;
+      /* The Server Room Background */
+      background: #050505 url('circuits-with-lights.png') no-repeat center center;
+      background-size: cover;
       font-family: "Courier New", Courier, monospace;
       overflow: hidden;
     }
 
-    /* 1. Bulletproof Server Room Background Environment */
-    .environment {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: url('image_0.png') no-repeat center center / cover;
-      z-index: 0;
-      display: flex; justify-content: flex-end; align-items: flex-end;
-      padding: 0 50px 50px 0; /* Position the TV in the foreground corner */
-    }
-
-    /* 2. Realistic 1980s TV Cabinet and Depth */
-    .tv-cabinet {
-      position: relative;
-      width: 800px; height: 600px;
-      border-radius: 30px;
-      /* Depth and texture through complex box-shadow and gradient stacking */
-      background:
-        /* Outer lighting shadow on the plastic */
-        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.05), transparent 30%),
-        /* Simulated plastic bezel color and shadow */
-        linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.8) 100%),
-        /* Dark beige/grey plastic housing */
-        radial-gradient(circle at center, #666 0%, #444 80%, #333 100%);
-      background-blend-mode: soft-light, overlay, normal;
+    /* 1. The Physical Broadcast Monitor */
+    .broadcast-monitor {
+      position: absolute;
+      bottom: 6%;
+      right: 5%;
+      width: 680px; 
+      height: 480px;
+      /* 3D Placement: Rotates the TV slightly inward to match the room's perspective */
+      transform: perspective(1200px) rotateY(-12deg);
+      transform-style: preserve-3d;
+      
+      /* Industrial casing texture and shadows */
+      background: 
+        linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%),
+        linear-gradient(to right, #2a2a2a, #1a1a1a 80%, #111);
+      border-radius: 15px;
+      border: 2px solid #333;
       box-shadow: 
-        0 30px 60px rgba(0,0,0,0.9), /* Outer room shadow */
-        inset 0 10px 20px rgba(255,255,255,0.1); /* Bezel highlights */
-      border: 8px solid #222; /* Protective lip */
-      padding: 40px; /* Recess the screen */
-      z-index: 1;
-      display: flex; justify-content: center; align-items: center;
-      /* Positioning within the environment */
-      transform: translateY(-20px) translateX(-20px);
+        -30px 40px 60px rgba(0,0,0,0.8), /* Floor shadow */
+        inset 2px 2px 5px rgba(255,255,255,0.1), /* Top edge highlight */
+        inset -5px -5px 15px rgba(0,0,0,0.8); /* Bottom edge shadow */
+      
+      padding: 25px;
+      display: flex; 
+      gap: 20px;
+      z-index: 10;
     }
 
-    /* 3. The Functional Glass Screen Tube */
-    .screen-bezel {
-      position: relative;
-      width: 100%; height: 100%;
+    /* 2. The Recessed Screen Area */
+    .screen-housing {
+      flex-grow: 1;
       background: #000;
-      border-radius: 50% / 10%; /* Creates a slight curve to the edges */
-      box-shadow: inset 0 0 50px rgba(0,0,0,1); /* Deep screen shadow */
+      border-radius: 20px;
+      /* Deep inner shadow to recess the tube */
+      box-shadow: 
+        inset 0 0 30px rgba(0,0,0,1),
+        0 0 0 8px #111,
+        0 0 0 10px #333;
+      position: relative;
       overflow: hidden;
-      display: flex; justify-content: center; align-items: center;
     }
 
-    /* The actual Canvas Element */
     canvas {
       width: 100%; height: 100%;
       display: block;
-      border-radius: 50% / 10%;
-      /* CRT distortion filters: softness and brightness integration */
-      filter: contrast(1.1) brightness(0.9) blur(0.5px);
+      border-radius: 20px;
+      filter: contrast(1.1) brightness(0.85) blur(0.4px);
     }
 
-    /* 4. The Integrated OSD Overlay UI */
+    /* 3. The Physical Control Panel (Right Side) */
+    .control-panel {
+      width: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+      border-left: 2px groove #333;
+    }
+
+    /* Physical Knobs */
+    .knob {
+      width: 45px; height: 45px;
+      background: radial-gradient(circle at 30% 30%, #555, #111);
+      border-radius: 50%;
+      margin-bottom: 25px;
+      box-shadow: 
+        2px 5px 10px rgba(0,0,0,0.8),
+        inset 0 0 2px #000;
+      position: relative;
+    }
+    .knob::after {
+      content: ''; position: absolute;
+      top: 5px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 12px;
+      background: #fff; border-radius: 2px;
+    }
+    .knob:nth-child(2) { transform: rotate(45deg); }
+    .knob:nth-child(3) { transform: rotate(-30deg); }
+
+    /* Speaker Grill */
+    .speaker-grill {
+      width: 50px; flex-grow: 1;
+      margin-top: 20px; margin-bottom: 10px;
+      background: radial-gradient(circle, #000 30%, transparent 35%);
+      background-size: 8px 8px;
+      opacity: 0.6;
+    }
+
+    /* 4. The Screen Overlays */
+    .scanlines {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none; z-index: 10;
+    }
+
+    /* Tube Reflection (Simulates the glass reflecting the server room) */
+    .glass-reflection {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(105deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(50, 255, 50, 0.05) 100%);
+      pointer-events: none; z-index: 11;
+      border-radius: 20px;
+    }
+
     .ui-layer {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; /* Let clicks pass through to the OSD */
+      pointer-events: none; 
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       text-align: center;
     }
 
     .osd {
-      background: rgba(0, 0, 0, 0.9);
-      padding: 30px 50px;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 20px 40px;
       border: 2px solid #fff;
-      pointer-events: auto; /* Re-enable clicks for the button */
+      pointer-events: auto; 
       box-shadow: 0 0 20px rgba(0,0,0,1);
     }
 
-    h1 { color: #fff; font-size: 4rem; margin: 0 0 10px; letter-spacing: 5px; text-shadow: 0 0 10px #fff; }
-    p { color: #0f0; font-size: 1.2rem; margin: 0 0 20px; text-transform: uppercase; }
+    h1 { color: #fff; font-size: 3.5rem; margin: 0 0 10px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
+    p { color: #0f0; font-size: 1.1rem; margin: 0 0 20px; text-transform: uppercase; }
     
     a.btn {
       color: #000; background: #fff; text-decoration: none;
       padding: 10px 20px; font-weight: bold; text-transform: uppercase;
       display: inline-block; transition: 0.2s; border: 2px solid #fff;
+      cursor: pointer;
     }
     a.btn:hover { background: #000; color: #fff; }
 
-    /* 5. CRT Scanlines Overlay with environmental integration */
-    .scanlines {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      /* Complex interweaving scanlines and color matrix */
-      background:
-        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-        linear-gradient(90deg, rgba(255, 0, 0, 0.08), rgba(0, 255, 0, 0.03), rgba(0, 0, 255, 0.08)),
-        /* Very subtle environmental reflection blur */
-        radial-gradient(circle at 10% 10%, rgba(30, 200, 30, 0.05), transparent 40%);
-      background-blend-mode: normal, normal, overlay;
-      background-size: 100% 4px, 6px 100%, 100% 100%;
-      pointer-events: none; z-index: 10;
-    }
-
-    /* Staggered Typewriter Animation for OSD copy */
+    /* Diagnostic Terminal Logs */
     @keyframes typing { from { width: 0 } to { width: 100% } }
     @keyframes blink-cursor { from, to { border-color: transparent } 50% { border-color: #0f0 } }
-    .osd-logs {
-      position: absolute; bottom: 20px; left: 20px;
-      z-index: 5; color: #0f0; font-size: 0.9rem;
-      text-align: left; opacity: 0.8; pointer-events: none;
+    .terminal-logs {
+      position: absolute; bottom: 15px; left: 15px;
+      z-index: 5; color: #0f0; font-size: 0.85rem;
+      text-align: left; opacity: 0.85; pointer-events: none;
     }
     .log-line {
-      overflow: hidden; white-space: nowrap; margin: 5px 0;
+      overflow: hidden; white-space: nowrap; margin: 4px 0;
       width: 0; border-right: 2px solid transparent;
+      text-shadow: 0 0 3px #0f0;
     }
     .log-1 { animation: typing 1s steps(40, end) forwards; animation-delay: 0.5s; }
     .log-2 { animation: typing 1s steps(40, end) forwards; animation-delay: 1.5s; }
@@ -138,83 +178,76 @@
 </head>
 <body>
 
-  <div class="environment">
+  <div class="broadcast-monitor">
+    
+    <div class="screen-housing">
+      <canvas id="crtScreen"></canvas>
+      <div class="scanlines"></div>
+      <div class="glass-reflection"></div>
 
-    <div class="tv-cabinet">
-      
-      <div class="screen-bezel">
-        
-        <canvas id="crtScreen"></canvas>
-        
-        <div class="scanlines"></div>
-
-        <div class="ui-layer">
-          <div class="osd">
-            <h1>NO SIGNAL</h1>
-            <p>ERR 404: ROUTING FAULT</p>
-            <a href="/" class="btn">Patch to Main</a>
-          </div>
+      <div class="ui-layer">
+        <div class="osd">
+          <h1>NO SIGNAL</h1>
+          <p>ERR 404: ROUTING FAULT</p>
+          <a href="/" class="btn">Patch to Main</a>
         </div>
+      </div>
 
-        <div class="osd-logs terminal-logs">
-          <div class="log-line log-1">> ping databoy ... TIMEOUT</div>
-          <div class="log-line log-2">> ATEM Software Control ... OFFLINE</div>
-          <div class="log-line log-3">> QLab OSC port 53000 ... NO RESPONSE</div>
-          <div class="log-line log-4">> Dante Controller sync ... FAILED</div>
-          <div class="log-line log-5">> FATAL: Page /floaties! missing from ProPresenter playlist. _</div>
-        </div>
-
+      <div class="terminal-logs">
+        <div class="log-line log-1">> ping databoy ... TIMEOUT</div>
+        <div class="log-line log-2">> ATEM Software Control ... OFFLINE</div>
+        <div class="log-line log-3">> QLab OSC port 53000 ... NO RESPONSE</div>
+        <div class="log-line log-4">> Dante Controller sync ... FAILED</div>
+        <div class="log-line log-5">> FATAL: Target destination missing from routing table. _</div>
       </div>
     </div>
+
+    <div class="control-panel">
+      <div class="knob"></div>
+      <div class="knob"></div>
+      <div class="knob"></div>
+      <div class="speaker-grill"></div>
+    </div>
+
   </div>
 
   <script>
-    // The JavaScript Graphics Engine
     const canvas = document.getElementById('crtScreen');
     const ctx = canvas.getContext('2d');
     
-    // Set internal resolution
-    canvas.width = 800;
-    canvas.height = 600;
+    // Scale for standard field monitor resolution
+    canvas.width = 640;
+    canvas.height = 480;
 
-    // SMPTE Color Data
-    const colors = ['#bfbfbf', '#c0c000', '#00c0c0', '#00c000', '#c0c0c0', '#c00000', '#0000c0'];
+    const colors = ['#bfbfbf', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0'];
     const barWidth = canvas.width / colors.length;
-
     let offset = 0;
 
     function draw() {
-      // 1. Draw the rolling SMPTE bars
-      offset -= 2; // Speed of the vertical roll
+      offset -= 2; 
       if (offset <= -canvas.height) offset = 0;
 
       for (let i = 0; i < colors.length; i++) {
         ctx.fillStyle = colors[i];
-        // Draw two sets of bars so it loops seamlessly
         ctx.fillRect(i * barWidth, offset, barWidth, canvas.height);
         ctx.fillRect(i * barWidth, offset + canvas.height, barWidth, canvas.height);
       }
 
-      // 2. Generate Real-Time Organic Static/Noise
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imgData.data;
       
       for (let i = 0; i < data.length; i += 4) {
-        if (Math.random() > 0.6) { // Scramble 40% of pixels
+        if (Math.random() > 0.6) { 
           const noise = Math.random() * 255;
-          // Blend with underlying color
-          data[i]     = (data[i] + noise) / 2;     // Red
-          data[i + 1] = (data[i + 1] + noise) / 2; // Green
-          data[i + 2] = (data[i + 2] + noise) / 2; // Blue
+          data[i]     = (data[i] + noise) / 2;    
+          data[i + 1] = (data[i + 1] + noise) / 2; 
+          data[i + 2] = (data[i + 2] + noise) / 2; 
         }
       }
       ctx.putImageData(imgData, 0, 0);
-
-      // Loop the animation
       requestAnimationFrame(draw);
     }
-
-    // Start the broadcast
+    
     draw();
   </script>
 </body>
