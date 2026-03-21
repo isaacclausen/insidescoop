@@ -68,32 +68,6 @@
       animation: bouncyFloat 2s ease-in-out infinite alternate, squeeze 0.5s infinite alternate;
     }
 
-    /* Return link styled like a chunky cartoon button */
-    a.return-btn {
-      display: inline-block;
-      margin-top: 30px;
-      padding: 15px 40px;
-      font-size: 1.5rem;
-      color: #fff;
-      background: #ff3f34;
-      text-decoration: none;
-      border: 4px solid #fff;
-      border-radius: 50px;
-      box-shadow: 0 8px 0 #d2dae2, 0 15px 20px rgba(0,0,0,0.4);
-      transition: all 0.1s;
-      pointer-events: auto; /* Re-enable clicks for the button */
-      text-transform: uppercase;
-    }
-
-    a.return-btn:hover {
-      transform: translateY(4px);
-      box-shadow: 0 4px 0 #d2dae2, 0 10px 15px rgba(0,0,0,0.4);
-    }
-    a.return-btn:active {
-      transform: translateY(8px);
-      box-shadow: 0 0 0 #d2dae2, 0 5px 10px rgba(0,0,0,0.4);
-    }
-
     @keyframes bouncyFloat {
       0% { transform: translateY(-20px) rotate(-2deg); }
       100% { transform: translateY(20px) rotate(2deg); }
@@ -113,7 +87,6 @@
   <!-- The Massive Message -->
   <div class="message-container">
     <h1>That is incorrect.</h1>
-    <a href="/" class="return-btn">Flee to Safety</a>
   </div>
 
   <script>
