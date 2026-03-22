@@ -61,10 +61,10 @@
       margin: 0;
       color: #ffd32a;
       text-transform: uppercase;
-      -webkit-text-stroke: 4px #ff3f34;
+      -webkit-text-stroke: 0.05em #ff3f34;
       text-shadow: 
-        8px 8px 0 #ff3f34,
-        15px 15px 20px rgba(0,0,0,0.5);
+        0.1em 0.1em 0 #ff3f34,
+        0.2em 0.2em 0.25em rgba(0,0,0,0.5);
       animation: bouncyFloat 2s ease-in-out infinite alternate, squeeze 0.5s infinite alternate;
     }
 
@@ -77,6 +77,15 @@
       0% { transform: scaleX(1) scaleY(1) translateY(0); }
       100% { transform: scaleX(1.05) scaleY(0.95) translateY(0); }
     }
+
+    .miller {
+      opacity: 0;
+      animation: fadeIn 2s ease-in forwards;
+      animation-delay: 5s;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -86,7 +95,7 @@
 
   <!-- The Massive Message -->
   <div class="message-container">
-    <h1>That is incorrect, Miller.</h1>
+    <h1>That is incorrect<span class="miller">, Miller</span></h1>
   </div>
 
   <script>
@@ -100,12 +109,46 @@
     const ducks = [];
     const particles = [];
     
+    // Preload custom images
+    const duckImages = [
+      'duckshell.png', 'duckdead.png', 'ducksnow.png', 'truck.png', 'booker.png',
+      'drivethrough.png', 'duckter.png', 'duckspy.png', 'duckchips.png', 'ducklazy.png',
+      'stopsign.png', 'lamp.png', 'pond.png', 'tree.png', 'duckskate.png',
+      'duckstronaut.png', 'duckart.png', 'duckbooks.png', 'duckcook.png', 'mailbox.png',
+      'bike.png', 'birdhouse.png', 'campfire.png', 'phonebooth.png', 'duckbuild.png',
+      'duckgarden.png', 'ducksci.png', 'ducksinger.png', 'duckfire.png'
+    ].map(src => {
+      const img = new Image();
+      img.src = 'ducks/' + src;
+      return img;
+    });
+    
+    // Image pool to guarantee variety before repeating
+    let imagePool = [];
+    function getNextImage() {
+      if (imagePool.length === 0) {
+        imagePool = [...duckImages];
+        // Shuffle the pool
+        for (let i = imagePool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [imagePool[i], imagePool[j]] = [imagePool[j], imagePool[i]];
+        }
+      }
+      return imagePool.pop();
+    }
+
     // Track mouse/touch for interactive forces
     let pointer = { x: -1000, y: -1000, isDown: false };
 
     function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
     }
     window.addEventListener('resize', resize);
     resize();
@@ -141,6 +184,7 @@
         this.vy = (Math.random() - 0.5) * 6;
         this.angle = 0;
         this.spin = (Math.random() - 0.5) * 0.1;
+        this.img = getNextImage();
       }
       update() {
         // Move
@@ -148,9 +192,55 @@
         this.y += this.vy;
         this.angle += this.spin;
 
-        // Bounce off walls
-        if (this.x < 0 || this.x > width) this.vx *= -1;
-        if (this.y < 0 || this.y > height) this.vy *= -1;
+        // Bounce off walls with 20% decay
+        const radius = this.size / 2;
+        if (this.x - radius < 0) { this.x = radius; this.vx *= -0.8; }
+        else if (this.x + radius > width) { this.x = width - radius; this.vx *= -0.8; }
+        
+        if (this.y - radius < 0) { this.y = radius; this.vy *= -0.8; }
+        else if (this.y + radius > height) { this.y = height - radius; this.vy *= -0.8; }
+
+        // Bounce off other ducks with 20% decay
+        for (let i = 0; i < ducks.length; i++) {
+          const other = ducks[i];
+          if (other === this) continue;
+
+          const dx = this.x - other.x;
+          const dy = this.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = radius + (other.size / 2); // Combined object bounds
+
+          if (dist < minDist && dist > 0) {
+            // Resolve visual overlap so they don't get stuck together
+            const overlap = minDist - dist;
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            this.x += nx * (overlap / 2);
+            this.y += ny * (overlap / 2);
+            other.x -= nx * (overlap / 2);
+            other.y -= ny * (overlap / 2);
+
+            // Calculate relative velocity
+            const rvx = this.vx - other.vx;
+            const rvy = this.vy - other.vy;
+            const velAlongNormal = rvx * nx + rvy * ny;
+
+            // Apply physics impulse if they are moving towards each other
+            if (velAlongNormal < 0) {
+              const restitution = 0.8; // 0.8 = 20% speed lost in collision
+              const impulse = -(1 + restitution) * velAlongNormal / 2; // Assuming equal mass
+
+              const impulseX = nx * impulse;
+              const impulseY = ny * impulse;
+
+              this.vx += impulseX;
+              this.vy += impulseY;
+              other.vx -= impulseX;
+              other.vy -= impulseY;
+            }
+          }
+        }
 
         // Interactive: Run away from the mouse/touch pointer
         const dx = this.x - pointer.x;
@@ -164,18 +254,37 @@
           this.spin += (Math.random() - 0.5) * 0.2; // Spin wildly when scared
         }
 
-        // Friction to cap speed
-        this.vx *= 0.99;
-        this.vy *= 0.99;
+        // Random spaz to keep movement energetic
+        if (Math.random() < 0.001) {
+          this.vx += (Math.random() - 0.5) * 15;
+          this.vy += (Math.random() - 0.5) * 15;
+          this.spin += (Math.random() - 0.5) * 0.4;
+        }
+
+        this.spin *= 0.95;
+        
+        // Cap max speed so they don't accelerate infinitely
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (speed > 15) {
+          this.vx = (this.vx / speed) * 15;
+          this.vy = (this.vy / speed) * 15;
+        }
       }
       draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        ctx.font = `${this.size}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🦆", 0, 0);
+        if (this.img.complete && this.img.naturalWidth !== 0) {
+          const aspect = this.img.naturalWidth / this.img.naturalHeight;
+          let w = this.size;
+          let h = this.size;
+          if (aspect > 1) {
+            h = this.size / aspect; // Wider than tall
+          } else {
+            w = this.size * aspect; // Taller than wide
+          }
+          ctx.drawImage(this.img, -w / 2, -h / 2, w, h);
+        }
         ctx.restore();
       }
     }
@@ -193,12 +302,14 @@
         this.gravity = 0.5;
         this.life = 1.0;
         this.decay = Math.random() * 0.02 + 0.01;
+        this.img = getNextImage();
       }
       update() {
         this.x += this.vx;
         this.y += this.vy;
         this.vy += this.gravity; // Fall down
         this.angle += this.spin;
+        this.spin *= 0.95;
         this.life -= this.decay;
       }
       draw() {
@@ -206,10 +317,18 @@
         ctx.globalAlpha = Math.max(0, this.life);
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        ctx.font = `${this.size * Math.max(0, this.life)}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🦆", 0, 0);
+        const currentSize = this.size * Math.max(0, this.life);
+        if (this.img.complete && this.img.naturalWidth !== 0) {
+          const aspect = this.img.naturalWidth / this.img.naturalHeight;
+          let w = currentSize;
+          let h = currentSize;
+          if (aspect > 1) {
+            h = currentSize / aspect;
+          } else {
+            w = currentSize * aspect;
+          }
+          ctx.drawImage(this.img, -w / 2, -h / 2, w, h);
+        }
         ctx.restore();
       }
     }
